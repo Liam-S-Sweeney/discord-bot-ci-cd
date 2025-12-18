@@ -1,0 +1,136 @@
+nano requirements.txt
+    GNU nano 7.2                                       requirements.txt                                                 
+        discord.py
+        python-dotenv
+        flask
+        Pillow
+        asyncio
+
+###
+
+nano .env
+    GNU nano 7.2                                             .env                                                       
+discord_api_token=TOKEN.HERE
+
+###
+
+sudo nano /etc/systemd/system/bseh-discord-bot.service
+    GNU nano 7.2                         /etc/systemd/system/bseh-discord-bot.service                                   
+        [Unit]
+        Description=BSEH Discord Bot (discord.py)
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=simple
+        User=USER
+        WorkingDirectory=/home/USER/BSEH_Bot_Code
+        EnvironmentFile=/home/USER/BSEH_Bot_Code/.env
+        ExecStart=/home/USER/BSEH_Bot_Code/.venv/bin/python /home/USER/BSEH_Bot_Code/bseh_bot.py
+
+        Restart=always
+        RestartSec=5
+        StartLimitIntervalSec=60
+        StartLimitBurst=5
+
+        # Nice-to-have: avoid buffering so logs appear immediately
+        Environment=PYTHONUNBUFFERED=1
+
+        [Install]
+        WantedBy=multi-user.target
+
+###
+
+sudo nano /etc/systemd/system/bseh-reclone-update.service
+    GNU nano 7.2                        /etc/systemd/system/bseh-reclone-update.service                                 
+        [Unit]
+        Description=Reclone BSEH bot from GitHub and restart if updated
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/bin/bseh-reclone-update.sh
+
+        [Service]
+        User=USER
+        Group=USER
+
+###
+
+sudo nano /usr/local/bin/bseh-auto-update.sh
+    GNU nano 7.2                              /usr/local/bin/bseh-auto-update.sh                                        
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        REPO_DIR="/home/USER/BSEH_Bot_Code"
+        BRANCH="main"
+        BOT_SERVICE="bseh-discord-bot"
+
+        cd "$REPO_DIR"
+
+        # Ensure GitHub is reachable
+        git fetch origin "$BRANCH" --quiet
+
+        LOCAL="$(git rev-parse HEAD)"
+        REMOTE="$(git rev-parse "origin/$BRANCH")"
+
+        if [ "$LOCAL" = "$REMOTE" ]; then
+        echo "No update. Local=$LOCAL"
+        exit 0
+        fi
+
+        echo "Update detected. Local=$LOCAL Remote=$REMOTE"
+
+        # restart moved to end
+
+        #Update working tree (keep .venv)
+        git reset --hard "origin/$BRANCH"
+        git clean -fd -e .venv
+
+        # Ensure venv exists, then install deps inside it
+        if [ ! -x "$REPO_DIR/.venv/bin/python" ]; then
+        python3 -m venv "$REPO_DIR/.venv"
+        fi
+
+        "$REPO_DIR/.venv/bin/python" -m pip install -U pip
+        "$REPO_DIR/.venv/bin/python" -m pip install -r "$REPO_DIR/requirements.txt"
+
+        # Start bot
+        sudo -n /bin/systemctl restart "${BOT_SERVICE}.service"
+
+        echo "Deployed $REMOTE and restarted $BOT_SERVICE"
+
+###
+
+sudo nano /etc/systemd/system/bseh-auto-update.service
+    GNU nano 7.2                         /etc/systemd/system/bseh-auto-update.service                                   
+        [Unit]
+        Description=Auto-update BSEH bot from GitHub if origin/main changed
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        User=USER
+        WorkingDirectory=/home/USER/BSEH_Bot_Code
+        Environment=HOME=/home/USER
+        ExecStart=/usr/local/bin/bseh-auto-update.sh
+
+###
+
+sudo nano /etc/systemd/system/bseh-auto-update.timer
+     GNU nano 7.2                          /etc/systemd/system/bseh-auto-update.timer                                    
+        [Unit]
+        Description=Run BSEH auto-update every 10 minutes
+
+        [Timer]
+        OnBootSec=2min
+        OnUnitActiveSec=10min
+        Unit=bseh-auto-update.service
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+
+
