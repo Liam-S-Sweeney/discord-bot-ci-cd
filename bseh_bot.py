@@ -19,6 +19,9 @@ load_dotenv()
 discord_token = os.getenv('discord_api_token')
 print("Token loaded?", discord_token is not None)
 
+COMMAND_LIST = [
+'list here'
+]
 
 # Bot Setup
 intents = discord.Intents.default()
@@ -26,37 +29,6 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
-
-SAFE_CHICKEN_GIFS = [
-    "https://tenor.com/view/chicken-werk-chicken-dance-gif-11998781060591627495",
-    "https://tenor.com/view/chicken-chickenbro-calling-dance-sing-gif-6667284142870503542",
-    "https://tenor.com/view/chicken-cluck-caw-heihei-gif-12652868522842709939",
-    "https://tenor.com/view/chicken-gif-7202518248086882735",
-    "https://tenor.com/view/rooster-peck-looking-at-viewer-honest-reaction-gif-5428669925222306214",
-    "https://tenor.com/view/chicken-gif-8151061099800153363"
-]
-
-
-SAFE_CAT_GIFS = [
-    "https://tenor.com/view/cat-kung-fu-ai-orange-cat-fight-gif-8725930490492900021",
-    "https://tenor.com/view/cat-cute-cat-cat-dance-cute-cat-dance-ai-cat-gif-15064057413633942575",
-    "https://tenor.com/view/cat-leaf-vibes-vibing-sleeping-cat-gif-17297041570420202318",
-    "https://tenor.com/view/happy-catto-gif-15346413526676920650",
-    "https://tenor.com/view/qazqaz-gif-6790593549618684130",
-    "https://tenor.com/view/cat-cat-with-tongue-cat-smiling-gif-11949735780193730026"
-]
-
-COMMAND_LIST = ['verify', 
-                'hello', 
-                'goodbye', 
-                'love (@name)', 
-                'orgycouch', 
-                'hornyjail (@name)', 
-                'horseprayer', 
-                'bot_help', 
-                'approve', 
-                'reject',
-                ]
 
 @bot.event
 async def on_ready():
@@ -68,100 +40,57 @@ async def on_ready():
     if channel:
         await channel.send("Bot restarted and is online!")
 
+###
+
 @bot.command()
 async def test(ctx):
     await ctx.send('testing if vm is alive and working | TAKE 2')
+
+###
 
 @bot.command()
 async def hello(ctx):
     await ctx.send('Hello! I am BSEH Bot, here to assist you!')
 
+###
+
 @bot.command()
 async def goodbye(ctx):
     await ctx.send('Goodbye! I hope to see you again soon!')
+
+###
 
 @bot.command()
 async def love (ctx, member: discord.Member):
     await ctx.send(f'Love u, {member.mention} <3')
 
-@bot.command()
-async def orgycouch(ctx):
-    # await ctx.send('https://tenor.com/view/family-couch-penthouse-squad-silly-gif-5934205')
-    file_path = 'images/orgy_couch.png'
-    try:
-        await ctx.send(file=discord.File(file_path))
-        await ctx.send('Orgy Couch? 👀')
-    except FileNotFoundError:
-        await ctx.send(f"Error: {file_path} not found.")
-    except discord.Forbidden:
-        await ctx.send("Error: I do not have permission to attach files in this channel.")
-    
-@bot.command()
-async def hornyjail (ctx, member: discord.Member):
-    nsfw_general_id = 1427827050340683898
-    if ctx.channel.id == nsfw_general_id:
-        await ctx.send("This is a horny safe haven!")
-        return
-    await record_action(bot, ctx.author.id, member.id, "jg", "jr")
-    await ctx.send('https://tenor.com/view/horny-jail-bonk-dog-hit-head-stop-being-horny-gif-17298755')
-    await ctx.send(f'Bonk, {member.mention}')
-    await ctx.send('Stop being horny!')
-    
-@bot.command()
-async def bonk (ctx, member: discord.Member):
-    await ctx.send('https://tenor.com/view/bonk-gif-26414884')
-    await ctx.send(f'Bonk, {member.mention}')
-    await record_action(bot, ctx.author.id, member.id, "bg", "br")
+###
 
-@bot.command()
-async def bop (ctx, member: discord.Member):
-    await ctx.send('https://tenor.com/view/bonk-cat-slap-cat-gif-22044106')
-    await ctx.send(f'Bop!, {member.mention}')
-    await record_action(bot, ctx.author.id, member.id, "hg", "hr")
-    
-@bot.command()
-async def bang (ctx, member: discord.Member):
-    await ctx.send('https://tenor.com/view/bang-deanwinchester-supernatural-spn-jensen-ackles-gif-4652875')
-    await ctx.send(f'Bang!, {member.mention}')
-
-@bot.command()
-async def punishneighsayers(ctx):
-    NEIGHSAYER_ROLE_ID = 1450008980893077564  
-    role = ctx.guild.get_role(NEIGHSAYER_ROLE_ID)
-    if role is None:
-        await ctx.send("❌ Neighsayer role not found.")
-        return
-    await ctx.send('https://tenor.com/view/bonk-gif-26414884')
-    await ctx.send(f'🔨 **BONK TIME** 🔨\n{role.mention} have been punished!')
-
-@bot.command()
-async def horseprayer(ctx):
-    await ctx.send('https://tenor.com/view/horse-animal-funny-funny-horse-funny-animal-gif-10472912058037348017')
-    await ctx.send('Praise the Horse!🐴')
-    
-@bot.command()
-async def pussy(ctx):
-    await ctx.send(random.choice(SAFE_CAT_GIFS))
-    
 @bot.command()
 async def cock(ctx):
     await ctx.send(random.choice(SAFE_CHICKEN_GIFS))
+
+###
 
 @bot.command()
 async def ping(ctx):
     await ctx.send(f'Pong! {round(bot.latency * 1000)}ms')
 
+###
+
 @bot.command()
 async def bot_help(ctx):
     await ctx.send(f'Available commands: {", ".join(COMMAND_LIST)}')
 
-@bot.command()
+###
 
 @bot.event
 async def on_member_remove(member):
     print(f'{member} has left the server.')
-    channel = bot.get_channel(GENERAL_ID) # Test General
+    channel = bot.get_channel(GENERAL_ID)
     await channel.send(f'{member} has left the server.')
+
+###
 
 @bot.event
 async def on_member_join(member: discord.Member):
@@ -174,13 +103,15 @@ async def on_member_join(member: discord.Member):
     try:
         await member.add_roles(role, reason="Assigning unverified role on join")
         print(f'{member} has joined the server.')
-        channel = bot.get_channel(GENERAL_ID) # Test General
+        channel = bot.get_channel(GENERAL_ID)
         await channel.send(f'Welcome {member.mention} to Boston Social Events Hub! Please verify yourself by using the `!verify` command in #General to become a member.')
 
     except discord.Forbidden:
         print("Missing permissions to add roles (check role order & Manage Roles).")
     except Exception as e:
         print(f"Failed to assign 'Unverified' role to {member.name}: {e}")
+
+###
 
 @bot.command(name='verify')
 async def star_verification(ctx: commands.Context):
@@ -267,6 +198,8 @@ async def star_verification(ctx: commands.Context):
     except discord.HTTPException as e:
         print(f"Error switching roles: {e}")
 
+###
+
 @bot.command(name="approve")
 @commands.has_permissions(manage_roles=True)
 async def approve_member(ctx: commands.Context, member: discord.Member):
@@ -315,6 +248,8 @@ async def approve_member(ctx: commands.Context, member: discord.Member):
     except discord.HTTPException as e:
         await ctx.reply(f"Error changing roles: {e}")
 
+###
+
 @approve_member.error
 async def approve_member_error(ctx: commands.Context, error: commands.CommandError):
     if isinstance(error, commands.BadArgument):
@@ -331,6 +266,7 @@ async def approve_member_error(ctx: commands.Context, error: commands.CommandErr
         # Fallback: log but don't spam the channel
         print(f"Unexpected error in !approve: {error!r}")
 
+###
 
 @bot.command(name="reject")
 @commands.has_permissions(manage_roles=True)
@@ -376,6 +312,8 @@ async def reject_member(ctx: commands.Context, member: discord.Member):
     except discord.HTTPException as e:
         await ctx.reply(f"Error changing roles: {e}")
 
+###
+
 @reject_member.error
 async def reject_member_error(ctx: commands.Context, error: commands.CommandError):
     if isinstance(error, commands.BadArgument):
@@ -390,6 +328,8 @@ async def reject_member_error(ctx: commands.Context, error: commands.CommandErro
         await ctx.reply("Please specify a member to reject. Usage: `!reject @user`")
     else:
         print(f"Unexpected error in !reject: {error!r}")
+
+###
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError):
@@ -410,3 +350,4 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
 
 
 bot.run(discord_token)
+
